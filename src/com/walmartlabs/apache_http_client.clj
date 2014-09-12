@@ -8,6 +8,12 @@
            (org.apache.http.message BasicHttpEntityEnclosingRequest
                                     BasicHttpRequest)))
 
+(def ^:private unexceptional-status?
+  #{200 201 202 203 204 205 206 207 300 301 302 303 307})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Request transformations
+
 (defn- add-request-headers
   [^BasicHttpRequest request ring-request]
   (doseq [[k v] (:headers ring-request)]
@@ -41,6 +47,9 @@
         (.setEntity request (InputStreamEntity. body)))
       request)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Response transformations
+
 (defn- assoc-header
   [header-map ^Header header]
   (let [name (.getName header)
@@ -58,6 +67,9 @@
    :headers (response->headers response)
    :body (.getContent (.getEntity response))})
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Main interface
+
 (defn request
   "Makes a blocking http request using Apache HttpClient and
   transforms the response into a valid ring response map. Requests
@@ -69,9 +81,6 @@
         http-request (ring-request->request ring-request)]
     (-> (.execute http-client http-host http-request)
         response->ring-response)))
-
-(def ^:private unexceptional-status?
-  #{200 201 202 203 204 205 206 207 300 301 302 303 307})
 
 (defn wrap-exceptions
   "Throws an exception if the status of the response is not in the
