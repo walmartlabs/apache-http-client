@@ -10,7 +10,7 @@ as implementation
   {:request-method :get
    :scheme :http
    :uri "/user-agent"
-   :server-name "httpbin.org
+   :server-name "httpbin.org"
    :server-port 80})
 
 (apache-client/request request-map)
