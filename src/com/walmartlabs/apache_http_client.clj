@@ -59,6 +59,10 @@
    :body (.getContent (.getEntity response))})
 
 (defn request
+  "Makes a blocking http request using Apache HttpClient and
+  transforms the response into a valid ring response map. Requests
+  must also be a valid ring request. See
+  `https://github.com/ring-clojure/ring/wiki/Concepts`"
   [ring-request]
   (let [http-client (HttpClients/createDefault)
         http-host (ring-request->http-host ring-request)
@@ -66,10 +70,12 @@
     (-> (.execute http-client http-host http-request)
         response->ring-response)))
 
-(def unexceptional-status?
+(def ^:private unexceptional-status?
   #{200 201 202 203 204 205 206 207 300 301 302 303 307})
 
 (defn wrap-exceptions
+  "Throws an exception if the status of the response is not in the
+  200-300 range"
   [ring-response]
   (let [status (:status ring-response)]
     (if (unexceptional-status? status)
